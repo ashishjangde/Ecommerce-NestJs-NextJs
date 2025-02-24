@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, HttpStatus, HttpCode, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import {
@@ -9,13 +9,14 @@ import { ReturnAuthDto } from './dto/return-auth.dto';
 import {
   ApiTags,
   ApiOperation,
-  ApiResponse,
+  ApiResponse as APIResponse,
   ApiExtraModels,
 } from '@nestjs/swagger';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { VerifyUserDto } from './dto/verify-user.dto';
 import { ResetPasswordAuthDto } from './dto/reset-password-auth.dto';
-import { EmailAuthDto } from './dto/emai-auth.dto';
+import { EmailAuthDto } from './dto/email-auth.dto';
+import ApiResponse from 'src/common/responses/ApiResponse';
 
 @Controller('auth')
 @ApiTags('Auth Routes')
@@ -25,45 +26,45 @@ export class AuthController {
 
   @Post('/signup')
   @ApiOperation({ summary: 'Create New User' })
-  @ApiResponse({
+  @APIResponse({
     status: 201,
     description:
       'The user has been successfully created and verification code sent on the email.',
     schema: ApiCustomResponse(ReturnAuthDto),
   })
-  @ApiResponse({
+  @APIResponse({
     status: 200,
     description:
       'The non verified user has been successfully modified and erification code sent on the email. .',
     schema: ApiCustomResponse(ReturnAuthDto),
   })
-  @ApiResponse({
+  @APIResponse({
     status: 400,
     description: 'The verified User already exist.',
     schema: createErrorResponse(400, 'Account already exist With this email'),
   })
-  @ApiResponse({
+  @APIResponse({
     status: 500,
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
   })
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  create(@Body() createAuthDto: CreateAuthDto , @Res() res) {
+    return this.authService.create(createAuthDto , res);
   }
 
   @Post('/verify')
   @ApiOperation({ summary: 'Verify Created User' })
-  @ApiResponse({
+  @APIResponse({
     status: 200,
     description: 'The user has been successfully verified.',
     schema: ApiCustomResponse(ReturnAuthDto),
   })
-  @ApiResponse({
+  @APIResponse({
     status: 400,
     description: 'The user has been successfully verified.',
     schema: createErrorResponse(400, 'Account already verified'),
   })
-  @ApiResponse({
+  @APIResponse({
     status: 500,
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
@@ -74,17 +75,17 @@ export class AuthController {
 
   @Post('/login')
   @ApiOperation({ summary: 'Login User' })
-  @ApiResponse({
+  @APIResponse({
     status: 200,
     description: 'The user has been successfully logged in.',
     schema: ApiCustomResponse(ReturnAuthDto),
   })
-  @ApiResponse({
+  @APIResponse({
     status: 400,
     description: 'The user is not verified.',
     schema: createErrorResponse(400, 'Account "email" is not verified'),
   })
-  @ApiResponse({
+  @APIResponse({
     status: 500,
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
@@ -95,22 +96,22 @@ export class AuthController {
 
   @Post('/forgot-password')
   @ApiOperation({ summary: 'Forgot Password' })
-  @ApiResponse({
+  @APIResponse({
     status: 200,
     description: 'The user has been successfully sent the verification code.',
     schema: ApiCustomResponse({ message: 'Verification code sent on email' }),
   })
-  @ApiResponse({
+  @APIResponse({
     status: 400,
     description: 'The user is not verified.',
     schema: createErrorResponse(400, 'Account "email" is not verified'),
   })
-  @ApiResponse({
+  @APIResponse({
     status: 400,
     description: 'The user is not exist.',
     schema: createErrorResponse(400, 'Account "email" is not exist'),
   })
-  @ApiResponse({
+  @APIResponse({
     status: 500,
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
@@ -121,12 +122,22 @@ export class AuthController {
 
   @Post('/check-verification-code/')
   @ApiOperation({ summary: 'Check Verification Code' })
-  @ApiResponse({
+  @APIResponse({
     status: 200,
     description: 'The verification code is correct.',
     schema: ApiCustomResponse({ message: 'Verification code is correct' }),
   })
-  @ApiResponse({
+  @APIResponse({
+    status: 400,
+    description: 'The user is not verified.',
+    schema: createErrorResponse(400, 'Account "email" is not verified'),
+  })
+  @APIResponse({
+    status: 400,
+    description: 'The user is not exist.',
+    schema: createErrorResponse(400, 'Account "email" is not exist'),
+  })
+  @APIResponse({
     status: 500,
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
@@ -137,32 +148,47 @@ export class AuthController {
 
   @Post('/reset-password')
   @ApiOperation({ summary: 'Reset Password' })
-  @ApiResponse({
+  @APIResponse({
     status: 200,
     description: 'The password has been successfully reset.',
     schema: ApiCustomResponse({
       message: 'Password has been successfully reset',
     }),
   })
-  @ApiResponse({
+  @APIResponse({
+    status: 400,
+    description: 'The user is not verified.',
+    schema: createErrorResponse(400, 'Account "email" is not verified'),
+  })
+  @APIResponse({
+    status: 400,
+    description: 'The user is not exist.',
+    schema: createErrorResponse(400, 'Account "email" is not exist'),
+  })
+  @APIResponse({
     status: 500,
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
   })
-  resetPassword(@Body() ResetPasswordAuthDto: ResetPasswordAuthDto) {
-    return this.authService.resetPassword(ResetPasswordAuthDto);
+  resetPassword(@Body() resetPasswordAuthDto: ResetPasswordAuthDto) {
+    return this.authService.resetPassword(resetPasswordAuthDto);
   }
 
   @Post('/logout')
   @ApiOperation({ summary: 'Logout User' })
-  @ApiResponse({
+  @APIResponse({
     status: 200,
     description: 'The user has been successfully logged out.',
     schema: ApiCustomResponse({
       message: 'User has been successfully logged out',
     }),
   })
-  @ApiResponse({
+  @APIResponse({
+    status: 400,
+    description: 'The user is not logged in.',
+    schema: createErrorResponse(400, 'User is not logged in'),
+  })
+  @APIResponse({
     status: 500,
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
