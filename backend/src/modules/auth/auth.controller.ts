@@ -71,8 +71,8 @@ export class AuthController {
     description: 'The user is not verified.',
     schema: createErrorResponse(400, 'Account "email" is not verified'),
   })
-  login(@Body() loginAuthDto: LoginAuthDto, @Res() res: Response) {
-    return this.authService.login(loginAuthDto, res);
+  login(@Body() loginAuthDto: LoginAuthDto, @Req() req, @Res() res: Response) {
+    return this.authService.login(loginAuthDto, req, res);
   }
 
   @Public()
@@ -106,7 +106,7 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
   async googleAuthCallback(@Req() req, @Res() res: Response) {
-    const userResponse = await this.authService.socialLogin(req.user, res);
+    const userResponse = await this.authService.socialLogin(req.user, req, res);
     
     // You can redirect to your frontend with user info
     // res.redirect(`${process.env.FRONTEND_URL}/auth/success`);
@@ -129,7 +129,7 @@ export class AuthController {
   @UseGuards(AuthGuard('github'))
   @ApiOperation({ summary: 'GitHub OAuth callback' })
   async githubAuthCallback(@Req() req, @Res() res: Response) {
-    const userResponse = await this.authService.socialLogin(req.user, res);
+    const userResponse = await this.authService.socialLogin(req.user, req, res);
     
     // You can redirect to your frontend with user info
     // res.redirect(`${process.env.FRONTEND_URL}/auth/success`);
@@ -155,8 +155,8 @@ export class AuthController {
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
   })
-  verify(@Body() verifyUserDto: VerifyUserDto, @Res() res: Response) {
-    return this.authService.verify(verifyUserDto, res);
+  verify(@Body() verifyUserDto: VerifyUserDto, @Req() req, @Res() res: Response) {
+    return this.authService.verify(verifyUserDto, req, res);
   }
 
   @Post('/forgot-password')

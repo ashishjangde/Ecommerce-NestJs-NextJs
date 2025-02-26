@@ -8,9 +8,9 @@ import { GoogleStrategy } from '../../strategies/google.strategy';
 import { GithubStrategy } from '../../strategies/github.strategy';
 import { UserRepositories } from '../../repositories/user.repositories';
 import { SessionRepositories } from '../../repositories/session.repositories';
-import { ConfigModule } from '../../config/config.module';
-import ConfigService from '../../config/config.service';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { ConfigModule } from 'src/common/config/config.module';
+import ConfigService from 'src/common/config/config.service';
+import { PrismaModule } from 'src/common/prisma/prisma.module';
 import { EmailService } from 'src/common/utils/email.service';
 
 @Module({

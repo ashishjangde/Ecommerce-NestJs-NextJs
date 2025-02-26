@@ -1,14 +1,14 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import ConfigService from 'src/config/config.service';
+import ConfigService from 'src/common/config/config.service';
 import { UserRepositories } from 'src/repositories/user.repositories';
 import { Roles } from '@prisma/client';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
-    configService: ConfigService,
+     configService: ConfigService,
     private userRepositories: UserRepositories
   ) {
     super({

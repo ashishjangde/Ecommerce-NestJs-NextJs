@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Users } from '@prisma/client';
-import { Prisma as db } from 'src/lib/db/dbConfig';
 import { handleDatabaseOperations } from 'src/common/utils/utils';
 import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/common/prisma/prisma.service';
 
 @Injectable()
 export class UserRepositories {
+  constructor(private prisma: PrismaService) {}
   async createUser(data: Prisma.UsersCreateInput): Promise<Users | null> {
     return await handleDatabaseOperations(() =>
-      db.users.create({
+      this.prisma.users.create({
         data,
       }),
     );
@@ -16,7 +17,7 @@ export class UserRepositories {
 
   async findUserByEmail(email: string): Promise<Users | null> {
     return await handleDatabaseOperations(() =>
-      db.users.findUnique({
+      this.prisma.users.findUnique({
         where: { email },
       }),
     );
@@ -24,7 +25,7 @@ export class UserRepositories {
 
   async findUserById(id: string): Promise<Users | null> {
     return await handleDatabaseOperations(() =>
-      db.users.findUnique({
+      this.prisma.users.findUnique({
         where: { id },
       }),
     );
@@ -35,7 +36,7 @@ export class UserRepositories {
     data: Prisma.UsersUpdateInput,
   ): Promise<Users | null> {
     return await handleDatabaseOperations(() =>
-      db.users.update({
+      this.prisma.users.update({
         where: { id },
         data,
       }),
@@ -44,7 +45,7 @@ export class UserRepositories {
 
   async deleteUser(id: string): Promise<Users | null> {
     return await handleDatabaseOperations(() =>
-      db.users.delete({
+      this.prisma.users.delete({
         where: { id },
       }),
     );

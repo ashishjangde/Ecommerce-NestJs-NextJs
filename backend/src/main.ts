@@ -3,10 +3,9 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ConnectDb } from './lib/db/dbConfig';
 import { ValidationException } from './common/exceptions/validation.exception';
-
 import { Logger, ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 
 const logger = new Logger('MAIN');
 
@@ -18,6 +17,7 @@ async function bootstrap() {
     },
   });
 
+  app.use(cookieParser());
   app.setGlobalPrefix('api/v1');
 
   const config = new DocumentBuilder()
@@ -53,16 +53,10 @@ async function bootstrap() {
   // Enable class-transformer globally
   app.useGlobalInterceptors();
 
-  ConnectDb()
-    .then(async () => {
-      await app.listen(process.env.PORT ?? 3000);
-      logger.log(
-        `Application is running on: http://localhost:${process.env.PORT ?? 3000}`,
-      );
-    })
-    .catch((error: Error) => {
-      logger.error('Error connecting to the database', error);
-    });
+  await app.listen(process.env.PORT ?? 3000);
+  logger.log(
+    `Application is running on: http://localhost:${process.env.PORT ?? 3000}`,
+  );
 }
 
 void bootstrap();

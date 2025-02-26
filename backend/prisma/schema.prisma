@@ -23,7 +23,6 @@ model Users {
   verificationCode         String?
   verificationCodeExpireAt DateTime?
   sessions                 Sessions[]
-  refreshTokens            RefreshToken[]
   createdAt                DateTime   @default(now())
   updatedAt                DateTime   @default(now())
 }
@@ -31,21 +30,13 @@ model Users {
 model Sessions {
   id        String   @id @default(uuid())
   userId    String
-  token     String   @unique
+  token     String   @unique  @db.Text
+  ipAddress String?
+  userAgent String?  @db.Text
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  user      Users    @relation(fields: [userId], references: [id])
-}
-
-model RefreshToken {
-  id          String    @id @default(uuid())
-  token       String    @unique
-  userId      String
-  user        Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  isRevoked   Boolean   @default(false)
-  expiresAt   DateTime
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
+  updatedAt DateTime @updatedAt
+  user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   @@index([userId])
 }
+
