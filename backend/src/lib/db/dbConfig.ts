@@ -6,7 +6,7 @@ const logger = new Logger('DatabaseOperations');
 export const Prisma = new PrismaClient();
 
 export async function ConnectDb() {
-  Promise.resolve(
+  await Promise.resolve(
     Prisma.$connect()
       .then(() => {
         logger.log('Connected to the database');

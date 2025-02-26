@@ -11,13 +11,11 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 const logger = new Logger('MAIN');
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule ,{
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: {
-      origin: [
-          'http://localhost:3000',
-      ],
+      origin: ['http://localhost:3000'],
       credentials: true,
-    }
+    },
   });
 
   app.setGlobalPrefix('api/v1');
@@ -67,4 +65,4 @@ async function bootstrap() {
     });
 }
 
-bootstrap();
+void bootstrap();

@@ -1,36 +1,55 @@
-import { Injectable } from "@nestjs/common";
-import { Prisma as db} from "src/lib/db/dbConfig";
-import { Prisma, Sessions } from "@prisma/client";
-import { handleDatabaseOperations } from "src/common/utils/utils";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class SessionRepositories {
-    async create(data: Prisma.SessionsCreateInput): Promise<Sessions | null> {
-        return handleDatabaseOperations(() => db.sessions.create({ data }));
-    }
+  constructor(private prisma: PrismaService) {}
 
-    async findOne(where: Prisma.SessionsWhereUniqueInput): Promise<Sessions | null> {
-        return handleDatabaseOperations(() => db.sessions.findUnique({ where }));
-    }
+  async createSession(userId: string, token: string): Promise<any> {
+    return this.prisma.sessions.create({
+      data: {
+        userId,
+        token,
+      },
+    });
+  }
 
-    async findMany(params: {
-        skip?: number;
-        take?: number;
-        where?: Prisma.SessionsWhereInput;
-        orderBy?: Prisma.SessionsOrderByWithRelationInput;
-    }): Promise<Sessions[] | null> {
-        return handleDatabaseOperations(() => db.sessions.findMany(params));
-    }
+  async findSessionByToken(token: string): Promise<any> {
+    return this.prisma.sessions.findUnique({
+      where: {
+        token,
+      },
+      include: {
+        user: true,
+      },
+    });
+  }
 
-    async update(params: {
-        where: Prisma.SessionsWhereUniqueInput;
-        data: Prisma.SessionsUpdateInput;
-    }): Promise<Sessions | null> {
-        const { where, data } = params;
-        return handleDatabaseOperations(() => db.sessions.update({ where, data }));
-    }
+  async updateSession(sessionId: string, newToken: string): Promise<any> {
+    return this.prisma.sessions.update({
+      where: {
+        id: sessionId,
+      },
+      data: {
+        token: newToken,
+        updatedAt: new Date(),
+      },
+    });
+  }
 
-    async delete(where: Prisma.SessionsWhereUniqueInput): Promise<Sessions | null> {
-        return handleDatabaseOperations(() => db.sessions.delete({ where }));
-    }
+  async deleteSession(sessionId: string): Promise<any> {
+    return this.prisma.sessions.delete({
+      where: {
+        id: sessionId,
+      },
+    });
+  }
+
+  async deleteAllUserSessions(userId: string): Promise<any> {
+    return this.prisma.sessions.deleteMany({
+      where: {
+        userId,
+      },
+    });
+  }
 }

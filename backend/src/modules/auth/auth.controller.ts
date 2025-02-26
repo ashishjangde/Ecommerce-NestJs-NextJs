@@ -1,6 +1,11 @@
-import { Controller, Post, Body, HttpStatus, HttpCode, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Req, Res, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { AuthGuard } from '@nestjs/passport';
+import { Public } from '../../common/decorators/public.decorator';
+import { Response } from 'express';
 import { CreateAuthDto } from './dto/create-auth.dto';
+import { LoginAuthDto } from './dto/login-auth.dto';
+import ApiResponse from 'src/common/responses/ApiResponse';
 import {
   ApiCustomResponse,
   createErrorResponse,
@@ -11,20 +16,21 @@ import {
   ApiOperation,
   ApiResponse as APIResponse,
   ApiExtraModels,
+  ApiCookieAuth,
 } from '@nestjs/swagger';
-import { LoginAuthDto } from './dto/login-auth.dto';
 import { VerifyUserDto } from './dto/verify-user.dto';
 import { ResetPasswordAuthDto } from './dto/reset-password-auth.dto';
 import { EmailAuthDto } from './dto/email-auth.dto';
-import ApiResponse from 'src/common/responses/ApiResponse';
 
 @Controller('auth')
 @ApiTags('Auth Routes')
+@ApiCookieAuth()
 @ApiExtraModels(ReturnAuthDto)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/signup')
+  @Public()
+  @Post('register')
   @ApiOperation({ summary: 'Create New User' })
   @APIResponse({
     status: 201,
@@ -35,7 +41,7 @@ export class AuthController {
   @APIResponse({
     status: 200,
     description:
-      'The non verified user has been successfully modified and erification code sent on the email. .',
+      'The non verified user has been successfully modified and verification code sent on the email. .',
     schema: ApiCustomResponse(ReturnAuthDto),
   })
   @APIResponse({
@@ -48,8 +54,88 @@ export class AuthController {
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
   })
-  create(@Body() createAuthDto: CreateAuthDto , @Res() res) {
-    return this.authService.create(createAuthDto , res);
+  create(@Body() createAuthDto: CreateAuthDto, @Res() res: Response) {
+    return this.authService.create(createAuthDto, res);
+  }
+
+  @Public()
+  @Post('login')
+  @ApiOperation({ summary: 'Login User' })
+  @APIResponse({
+    status: 200,
+    description: 'The user has been successfully logged in.',
+    schema: ApiCustomResponse(ReturnAuthDto),
+  })
+  @APIResponse({
+    status: 400,
+    description: 'The user is not verified.',
+    schema: createErrorResponse(400, 'Account "email" is not verified'),
+  })
+  login(@Body() loginAuthDto: LoginAuthDto, @Res() res: Response) {
+    return this.authService.login(loginAuthDto, res);
+  }
+
+  @Public()
+  @Get('refresh')
+  @ApiOperation({ summary: 'Refresh Access Token' })
+  @APIResponse({
+    status: 200,
+    description: 'Tokens refreshed successfully.',
+    schema: ApiCustomResponse({ message: 'Tokens refreshed successfully' }),
+  })
+  @APIResponse({
+    status: 401,
+    description: 'Invalid refresh token.',
+    schema: createErrorResponse(401, 'Invalid refresh token'),
+  })
+  refresh(@Req() req, @Res() res: Response) {
+    return this.authService.refreshTokens(req, res);
+  }
+
+  @Public()
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Login with Google' })
+  googleAuth() {
+    // This route initiates the Google OAuth flow
+    // The guard handles redirection to Google
+  }
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Google OAuth callback' })
+  async googleAuthCallback(@Req() req, @Res() res: Response) {
+    const userResponse = await this.authService.socialLogin(req.user, res);
+    
+    // You can redirect to your frontend with user info
+    // res.redirect(`${process.env.FRONTEND_URL}/auth/success`);
+    
+    // Or just return the user data
+    res.status(HttpStatus.OK).json(new ApiResponse(userResponse));
+  }
+
+  @Public()
+  @Get('github')
+  @UseGuards(AuthGuard('github'))
+  @ApiOperation({ summary: 'Login with GitHub' })
+  githubAuth() {
+    // This route initiates the GitHub OAuth flow
+    // The guard handles redirection to GitHub
+  }
+
+  @Public()
+  @Get('github/callback')
+  @UseGuards(AuthGuard('github'))
+  @ApiOperation({ summary: 'GitHub OAuth callback' })
+  async githubAuthCallback(@Req() req, @Res() res: Response) {
+    const userResponse = await this.authService.socialLogin(req.user, res);
+    
+    // You can redirect to your frontend with user info
+    // res.redirect(`${process.env.FRONTEND_URL}/auth/success`);
+    
+    // Or just return the user data
+    res.status(HttpStatus.OK).json(new ApiResponse(userResponse));
   }
 
   @Post('/verify')
@@ -69,29 +155,8 @@ export class AuthController {
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
   })
-  verify(@Body() verifyUserDto: VerifyUserDto) {
-    return this.authService.verify(verifyUserDto);
-  }
-
-  @Post('/login')
-  @ApiOperation({ summary: 'Login User' })
-  @APIResponse({
-    status: 200,
-    description: 'The user has been successfully logged in.',
-    schema: ApiCustomResponse(ReturnAuthDto),
-  })
-  @APIResponse({
-    status: 400,
-    description: 'The user is not verified.',
-    schema: createErrorResponse(400, 'Account "email" is not verified'),
-  })
-  @APIResponse({
-    status: 500,
-    description: 'Server Error',
-    schema: createErrorResponse(500, 'Internal Server Error'),
-  })
-  login(@Body() LoginAuthDto: LoginAuthDto) {
-    return this.authService.login(LoginAuthDto);
+  verify(@Body() verifyUserDto: VerifyUserDto, @Res() res: Response) {
+    return this.authService.verify(verifyUserDto, res);
   }
 
   @Post('/forgot-password')
@@ -116,8 +181,8 @@ export class AuthController {
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
   })
-  forgotPassword(@Body() emailAuthDto: EmailAuthDto) {
-    return this.authService.forgotPassword(emailAuthDto);
+  forgotPassword(@Body() emailAuthDto: EmailAuthDto, @Res() res: Response) {
+    return this.authService.forgotPassword(emailAuthDto, res);
   }
 
   @Post('/check-verification-code/')
@@ -142,8 +207,8 @@ export class AuthController {
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
   })
-  checkVerificationCode(checkVerificationCodeDto: VerifyUserDto) {
-    return this.authService.checkVerificationCode(checkVerificationCodeDto);
+  checkVerificationCode(@Body() checkVerificationCodeDto: VerifyUserDto, @Res() res: Response) {
+    return this.authService.checkVerificationCode(checkVerificationCodeDto, res);
   }
 
   @Post('/reset-password')
@@ -170,8 +235,8 @@ export class AuthController {
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
   })
-  resetPassword(@Body() resetPasswordAuthDto: ResetPasswordAuthDto) {
-    return this.authService.resetPassword(resetPasswordAuthDto);
+  resetPassword(@Body() resetPasswordAuthDto: ResetPasswordAuthDto, @Res() res: Response) {
+    return this.authService.resetPassword(resetPasswordAuthDto, res);
   }
 
   @Post('/logout')
@@ -183,17 +248,7 @@ export class AuthController {
       message: 'User has been successfully logged out',
     }),
   })
-  @APIResponse({
-    status: 400,
-    description: 'The user is not logged in.',
-    schema: createErrorResponse(400, 'User is not logged in'),
-  })
-  @APIResponse({
-    status: 500,
-    description: 'Server Error',
-    schema: createErrorResponse(500, 'Internal Server Error'),
-  })
-  logout() {
-    return this.authService.logout();
+  logout(@Req() req, @Res() res: Response) {
+    return this.authService.logout(req, res);
   }
 }

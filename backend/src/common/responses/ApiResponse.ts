@@ -1,6 +1,7 @@
 import ApiError from './ApiError';
 import { ApiProperty, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export const ApiCustomResponse = (model: Function | Record<string, any>) => {
   return {
     type: 'object',
@@ -20,6 +21,7 @@ export const ApiCustomResponse = (model: Function | Record<string, any>) => {
                   ...acc,
                   [key]: {
                     type: typeof value,
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                     example: value,
                   },
                 }),
