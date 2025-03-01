@@ -16,7 +16,7 @@ import { ReturnAuthDto } from './dto/return-auth.dto';
 import { plainToClass } from 'class-transformer';
 import { Roles } from '@prisma/client';
 import ApiResponse from 'src/common/responses/ApiResponse';
-import { Response , Request} from 'express';
+import { Response } from 'express';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import ConfigService from 'src/common/config/config.service';
@@ -411,7 +411,10 @@ export class AuthService {
 
       // Return user data and tokens
       res.status(HttpStatus.OK).json(
-        new ApiResponse(plainToClass(ReturnAuthDto, user))
+        new ApiResponse({
+          user: plainToClass(ReturnAuthDto, user),
+          access_token: tokens.accessToken,
+        }),
       );
       return;
     } catch (error) {
@@ -425,9 +428,8 @@ export class AuthService {
   /**
    * Refresh tokens
    */
-  async refreshTokens(req:Request , res: Response) {
+  async refreshTokens(req: any, res: Response) {
     const refreshToken = req.cookies?.refresh_token;
-    console.log(req.cookies)
 
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token not provided');
@@ -469,7 +471,12 @@ export class AuthService {
       this.setCookies(res, tokens.accessToken, tokens.refreshToken);
 
       // Return success response
-      res.status(HttpStatus.OK).json(new ApiResponse(plainToClass(ReturnAuthDto, user)));
+      res.status(HttpStatus.OK).json(
+        new ApiResponse({
+          message: 'Tokens refreshed successfully',
+          access_token: tokens.accessToken,
+        }),
+      );
       return;
     } catch (error) {
       // Clear cookies on error
@@ -493,7 +500,10 @@ export class AuthService {
     this.setCookies(res, tokens.accessToken, tokens.refreshToken);
 
     // Return user data or redirect to frontend
-    return new ApiResponse(plainToClass(ReturnAuthDto, user))
+    return {
+      user: plainToClass(ReturnAuthDto, user),
+      access_token: tokens.accessToken,
+    };
   }
 
   /**
@@ -571,7 +581,7 @@ export class AuthService {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      path: '/', // Only sent to the refresh endpoint
+      path: '/auth/refresh', // Only sent to the refresh endpoint
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
   }

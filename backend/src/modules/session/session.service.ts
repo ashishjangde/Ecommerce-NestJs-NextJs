@@ -46,7 +46,7 @@ export class SessionService {
     // Delete all sessions except the current one
     const result = await this.sessionRepositories.deleteAllSessionsExceptOne(userId, currentSessionToken);
     
-    return { count: result.count };
+    return { count: result?.count || 0 };
   }
 
   /**

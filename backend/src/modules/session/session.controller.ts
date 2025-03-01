@@ -10,21 +10,27 @@ import {
 } from '@nestjs/common';
 import { SessionService } from './session.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiExtraModels } from '@nestjs/swagger';
 import { Response } from 'express';
 import ApiResponseClass from 'src/common/responses/ApiResponse';
 import { SessionDto } from './dto/session.dto';
+import { ApiCustomResponse, createErrorResponse } from 'src/common/responses/ApiResponse';
 
 @ApiTags('Sessions')
-@ApiBearerAuth()
 @Controller('sessions')
 @UseGuards(JwtAuthGuard)
+@ApiExtraModels(SessionDto)
 export class SessionController {
   constructor(private readonly sessionService: SessionService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all user sessions with current session marked' })
-  @ApiResponse({ status: 200, description: 'Returns all sessions', type: [SessionDto] })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200, 
+    description: 'Returns all sessions',
+    schema: ApiCustomResponse({ sessions: [SessionDto] })
+  })
   async getAllSessions(@Req() req, @Res() res: Response) {
     const userId = req.user.id;
     const currentSessionToken = req.cookies?.refresh_token;
@@ -38,7 +44,12 @@ export class SessionController {
 
   @Delete()
   @ApiOperation({ summary: 'Delete all sessions except current one' })
-  @ApiResponse({ status: 200, description: 'Returns number of deleted sessions' })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200, 
+    description: 'Returns number of deleted sessions',
+    schema: ApiCustomResponse({ message: 'Successfully deleted sessions', deletedCount: 0 })
+  })
   async deleteAllSessions(@Req() req, @Res() res: Response) {
     const userId = req.user.id;
     const currentSessionToken = req.cookies?.refresh_token;
@@ -56,9 +67,22 @@ export class SessionController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a specific session (cannot delete current session)' })
-  @ApiResponse({ status: 200, description: 'Session deleted successfully' })
-  @ApiResponse({ status: 403, description: 'Cannot delete current session or unauthorized' })
-  @ApiResponse({ status: 404, description: 'Session not found' })
+  @ApiResponse({
+    status: 200, 
+    description: 'Session deleted successfully',
+    schema: ApiCustomResponse({ message: 'Session deleted successfully' })
+  })
+  @ApiResponse({
+    status: 403, 
+    description: 'Cannot delete current session or unauthorized',
+    schema: createErrorResponse(403, 'Cannot delete current session')
+  })
+  @ApiResponse({
+    status: 404, 
+    description: 'Session not found',
+    schema: createErrorResponse(404, 'Session not found')
+  })
+  @ApiBearerAuth()
   async deleteSession(@Param('id') id: string, @Req() req, @Res() res: Response) {
     const userId = req.user.id;
     const currentSessionToken = req.cookies?.refresh_token;

@@ -17,14 +17,30 @@ export const ApiCustomResponse = (model: Function | Record<string, any>) => {
           : {
               type: 'object',
               properties: Object.entries(model).reduce(
-                (acc, [key, value]) => ({
-                  ...acc,
-                  [key]: {
-                    type: typeof value,
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    example: value,
-                  },
-                }),
+                (acc, [key, value]) => {
+                  // Handle arrays (for cases like [CategoryDto])
+                  if (Array.isArray(value) && value.length > 0) {
+                    return {
+                      ...acc,
+                      [key]: {
+                        type: 'array',
+                        items: typeof value[0] === 'function' 
+                          ? { $ref: getSchemaPath(value[0]) }
+                          : { type: typeof value[0], example: value[0] }
+                      }
+                    };
+                  }
+                  // Handle regular DTOs and other values
+                  return {
+                    ...acc,
+                    [key]: typeof value === 'function'
+                      ? { $ref: getSchemaPath(value) }
+                      : {
+                          type: typeof value,
+                          example: value,
+                        },
+                  };
+                },
                 {},
               ),
             },
