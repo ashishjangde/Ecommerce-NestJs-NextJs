@@ -18,7 +18,11 @@ export class EmailService {
     });
   }
 
-  async sendVerificationEmail(to: string, name: string, otp: string): Promise<boolean> {
+  async sendVerificationEmail(
+    to: string,
+    name: string,
+    otp: string,
+  ): Promise<boolean> {
     try {
       const appName = this.configService.get('APP_NAME') || 'Our App';
       await this.transporter.sendMail({
@@ -46,7 +50,11 @@ export class EmailService {
     }
   }
 
-  async sendPasswordResetEmail(to: string, name: string, otp: string): Promise<boolean> {
+  async sendPasswordResetEmail(
+    to: string,
+    name: string,
+    otp: string,
+  ): Promise<boolean> {
     try {
       const appName = this.configService.get('APP_NAME') || 'Our App';
       await this.transporter.sendMail({

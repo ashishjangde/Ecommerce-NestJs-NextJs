@@ -7,26 +7,36 @@ export class BaseCategoryDto {
   @MaxLength(100)
   name: string;
 
-  @ApiPropertyOptional({ description: 'Category description', example: 'All electronic products' })
+  @ApiPropertyOptional({
+    description: 'Category description',
+    example: 'All electronic products',
+  })
   @IsString()
   @IsOptional()
   @MaxLength(500)
   description?: string;
 
-
-
-  @ApiPropertyOptional({ description: 'Image URL for category', example: 'https://example.com/images/electronics.jpg' })
+  @ApiPropertyOptional({
+    description: 'Image URL for category',
+    example: 'https://example.com/images/electronics.jpg',
+  })
   @IsString()
   @IsOptional()
   imageUrl?: string;
 
-  @ApiPropertyOptional({ description: 'Meta title for SEO', example: 'Shop Electronics Online' })
+  @ApiPropertyOptional({
+    description: 'Meta title for SEO',
+    example: 'Shop Electronics Online',
+  })
   @IsString()
   @IsOptional()
   @MaxLength(100)
   metaTitle?: string;
 
-  @ApiPropertyOptional({ description: 'Meta description for SEO', example: 'Shop the best electronic products online' })
+  @ApiPropertyOptional({
+    description: 'Meta description for SEO',
+    example: 'Shop the best electronic products online',
+  })
   @IsString()
   @IsOptional()
   @MaxLength(250)
@@ -37,7 +47,10 @@ export class BaseCategoryDto {
   @IsOptional()
   isActive?: boolean;
 
-  @ApiPropertyOptional({ description: 'Parent category ID', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiPropertyOptional({
+    description: 'Parent category ID',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
   @IsString()
   @IsOptional()
   parentId?: string;

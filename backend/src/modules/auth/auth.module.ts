@@ -16,14 +16,16 @@ import { EmailService } from 'src/common/utils/email.service';
 @Module({
   imports: [
     PrismaModule,
-    ConfigModule, 
+    ConfigModule,
     PassportModule,
     JwtModule.registerAsync({
-      imports: [ConfigModule], 
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: configService.get('JWT_EXPIRATION') || '15m' },
+        signOptions: {
+          expiresIn: configService.get('JWT_EXPIRATION') || '15m',
+        },
       }),
     }),
   ],

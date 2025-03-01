@@ -18,14 +18,18 @@ export class CreateAuthDto {
   email: string;
 
   @ApiProperty()
-  @IsStrongPassword({
-    minLength: 8,
-    minLowercase: 1,
-    minUppercase: 1,
-    minNumbers: 1,
-    minSymbols: 1,
-  }, {
-    message: 'Password must be at least 8 characters long and include 1 lowercase letter, 1 uppercase letter, 1 number, and 1 special character'
-  })
+  @IsStrongPassword(
+    {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    },
+    {
+      message:
+        'Password must be at least 8 characters long and include 1 lowercase letter, 1 uppercase letter, 1 number, and 1 special character',
+    },
+  )
   password: string;
 }

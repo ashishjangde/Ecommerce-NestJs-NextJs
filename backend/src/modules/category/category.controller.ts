@@ -1,36 +1,39 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
-  Delete, 
-  Body, 
-  Param, 
-  UseGuards, 
-  HttpStatus, 
-  Res
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  HttpStatus,
+  Res,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { 
-  CreateCategoryDto, 
-  UpdateCategoryDto, 
-  CategoryDto, 
-  CategoryWithChildrenDto 
+import {
+  CreateCategoryDto,
+  UpdateCategoryDto,
+  CategoryDto,
+  CategoryWithChildrenDto,
 } from './dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Role } from 'src/common/decorators/roles.decorator';
-import { 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse as APIResponse, 
-  ApiBearerAuth, 
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse as APIResponse,
+  ApiBearerAuth,
   ApiExtraModels,
-  ApiCookieAuth
+  ApiCookieAuth,
 } from '@nestjs/swagger';
 import { Response } from 'express';
 import ApiResponseClass from '../../common/responses/ApiResponse';
-import { ApiCustomResponse, createErrorResponse } from '../../common/responses/ApiResponse';
+import {
+  ApiCustomResponse,
+  createErrorResponse,
+} from '../../common/responses/ApiResponse';
 
 @ApiTags('Categories')
 @Controller('category')
@@ -38,19 +41,19 @@ import { ApiCustomResponse, createErrorResponse } from '../../common/responses/A
 @ApiExtraModels(CategoryDto, CategoryWithChildrenDto)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
-  
+
   @Get()
   @ApiOperation({ summary: 'Get all categories' })
   @APIResponse({
     status: 200,
     description: 'Returns all categories',
-    schema: ApiCustomResponse({ categories: [CategoryDto] })
+    schema: ApiCustomResponse({ categories: [CategoryDto] }),
   })
   async getAllCategories(@Res() res: Response) {
     const categories = await this.categoryService.getAllCategories();
-    return res.status(HttpStatus.OK).json(new ApiResponseClass({
-      categories
-    }));
+    return res.status(HttpStatus.OK).json(
+      new ApiResponseClass(categories)
+  );
   }
 
   @Get('root')
@@ -58,13 +61,15 @@ export class CategoryController {
   @APIResponse({
     status: 200,
     description: 'Returns root categories',
-    schema: ApiCustomResponse({ categories: [CategoryDto] })
+    schema: ApiCustomResponse({ categories: [CategoryDto] }),
   })
   async getRootCategories(@Res() res: Response) {
     const categories = await this.categoryService.getRootCategories();
-    return res.status(HttpStatus.OK).json(new ApiResponseClass({
-      categories
-    }));
+    return res.status(HttpStatus.OK).json(
+      new ApiResponseClass({
+        categories,
+      }),
+    );
   }
 
   @Get(':categoryId/children')
@@ -72,18 +77,24 @@ export class CategoryController {
   @APIResponse({
     status: 200,
     description: 'Returns subcategories',
-    schema: ApiCustomResponse({ subcategories: [CategoryDto] })
+    schema: ApiCustomResponse({ subcategories: [CategoryDto] }),
   })
   @APIResponse({
     status: 404,
     description: 'Category not found',
-    schema: createErrorResponse(404, 'Category not found')
+    schema: createErrorResponse(404, 'Category not found'),
   })
-  async getSubCategories(@Param('categoryId') categoryId: string, @Res() res: Response) {
-    const subcategories = await this.categoryService.getSubCategories(categoryId);
-    return res.status(HttpStatus.OK).json(new ApiResponseClass({
-      subcategories
-    }));
+  async getSubCategories(
+    @Param('categoryId') categoryId: string,
+    @Res() res: Response,
+  ) {
+    const subcategories =
+      await this.categoryService.getSubCategories(categoryId);
+    return res.status(HttpStatus.OK).json(
+      new ApiResponseClass({
+        subcategories,
+      }),
+    );
   }
 
   @Get(':slug')
@@ -91,18 +102,20 @@ export class CategoryController {
   @APIResponse({
     status: 200,
     description: 'Returns the category',
-    schema: ApiCustomResponse(CategoryWithChildrenDto)
+    schema: ApiCustomResponse(CategoryWithChildrenDto),
   })
   @APIResponse({
     status: 404,
     description: 'Category not found',
-    schema: createErrorResponse(404, 'Category not found')
+    schema: createErrorResponse(404, 'Category not found'),
   })
   async getCategoryBySlug(@Param('slug') slug: string, @Res() res: Response) {
     const category = await this.categoryService.getCategoryBySlug(slug);
-    return res.status(HttpStatus.OK).json(new ApiResponseClass({
-      category
-    }));
+    return res.status(HttpStatus.OK).json(
+      new ApiResponseClass({
+        category,
+      }),
+    );
   }
 
   @Post()
@@ -113,24 +126,29 @@ export class CategoryController {
   @APIResponse({
     status: 201,
     description: 'Category created successfully',
-    schema: ApiCustomResponse( CategoryDto )
+    schema: ApiCustomResponse(CategoryDto),
   })
   @APIResponse({
     status: 400,
     description: 'Invalid data or slug already exists',
-    schema: createErrorResponse(400, 'Invalid data or slug already exists')
+    schema: createErrorResponse(400, 'Invalid data or slug already exists'),
   })
   @APIResponse({
     status: 403,
     description: 'Forbidden - requires admin role',
-    schema: createErrorResponse(403, 'Forbidden')
+    schema: createErrorResponse(403, 'Forbidden'),
   })
-  async createCategory(@Body() createCategoryDto: CreateCategoryDto, @Res() res: Response) {
-    const category = await this.categoryService.createCategory(createCategoryDto);
-    return res.status(HttpStatus.CREATED).json(new ApiResponseClass({
-      message: 'Category created successfully',
-      category
-    }));
+  async createCategory(
+    @Body() createCategoryDto: CreateCategoryDto,
+    @Res() res: Response,
+  ) {
+    const category =
+      await this.categoryService.createCategory(createCategoryDto);
+    return res.status(HttpStatus.CREATED).json(
+      new ApiResponseClass(
+        category,
+      ),
+    );
   }
 
   @Put(':id')
@@ -141,28 +159,33 @@ export class CategoryController {
   @APIResponse({
     status: 200,
     description: 'Category updated successfully',
-    schema: ApiCustomResponse( CategoryDto )
+    schema: ApiCustomResponse(CategoryDto),
   })
   @APIResponse({
     status: 404,
     description: 'Category not found',
-    schema: createErrorResponse(404, 'Category not found')
+    schema: createErrorResponse(404, 'Category not found'),
   })
   @APIResponse({
     status: 403,
     description: 'Forbidden - requires admin role',
-    schema: createErrorResponse(403, 'Forbidden')
+    schema: createErrorResponse(403, 'Forbidden'),
   })
   async updateCategory(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
-    @Res() res: Response
+    @Res() res: Response,
   ) {
-    const category = await this.categoryService.updateCategory(id, updateCategoryDto);
-    return res.status(HttpStatus.OK).json(new ApiResponseClass({
-      message: 'Category updated successfully',
-      category
-    }));
+    const category = await this.categoryService.updateCategory(
+      id,
+      updateCategoryDto,
+    );
+    return res.status(HttpStatus.OK).json(
+      new ApiResponseClass({
+        message: 'Category updated successfully',
+        category,
+      }),
+    );
   }
 
   @Delete(':id')
@@ -173,27 +196,32 @@ export class CategoryController {
   @APIResponse({
     status: 200,
     description: 'Category deleted successfully',
-    schema: ApiCustomResponse({ message: 'Category deleted successfully' })
+    schema: ApiCustomResponse({ message: 'Category deleted successfully' }),
   })
   @APIResponse({
     status: 404,
     description: 'Category not found',
-    schema: createErrorResponse(404, 'Category not found')
+    schema: createErrorResponse(404, 'Category not found'),
   })
   @APIResponse({
     status: 403,
     description: 'Forbidden - requires admin role',
-    schema: createErrorResponse(403, 'Forbidden')
+    schema: createErrorResponse(403, 'Forbidden'),
   })
   @APIResponse({
     status: 400,
     description: 'Cannot delete category with subcategories',
-    schema: createErrorResponse(400, 'Cannot delete category with subcategories')
+    schema: createErrorResponse(
+      400,
+      'Cannot delete category with subcategories',
+    ),
   })
   async deleteCategory(@Param('id') id: string, @Res() res: Response) {
     await this.categoryService.deleteCategory(id);
-    return res.status(HttpStatus.OK).json(new ApiResponseClass({
-      message: 'Category deleted successfully'
-    }));
+    return res.status(HttpStatus.OK).json(
+      new ApiResponseClass({
+        message: 'Category deleted successfully',
+      }),
+    );
   }
 }

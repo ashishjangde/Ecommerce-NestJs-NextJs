@@ -20,11 +20,11 @@ export class ReturnAuthDto {
   @Expose()
   email: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     enum: Roles,
     isArray: true,
     example: [Roles],
-    description: 'User roles' 
+    description: 'User roles',
   })
   @Expose()
   roles: Roles[];

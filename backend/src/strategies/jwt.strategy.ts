@@ -9,7 +9,7 @@ import { Request } from 'express';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     configService: ConfigService,
-    private userRepositories: UserRepositories
+    private userRepositories: UserRepositories,
   ) {
     super({
       jwtFromRequest: (req: Request) => {

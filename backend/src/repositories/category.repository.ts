@@ -19,12 +19,12 @@ export class CategoryRepository {
    * Find all categories
    */
   async findAll(): Promise<Category[]> {
-    const result = await handleDatabaseOperations(() => 
+    const result = await handleDatabaseOperations(() =>
       this.prisma.category.findMany({
         orderBy: {
           name: 'asc',
         },
-      })
+      }),
     );
     return result || [];
   }
@@ -33,7 +33,7 @@ export class CategoryRepository {
    * Find root categories (those without parents)
    */
   async findRootCategories(): Promise<Category[]> {
-    const result = await handleDatabaseOperations(() => 
+    const result = await handleDatabaseOperations(() =>
       this.prisma.category.findMany({
         where: {
           parentId: null,
@@ -41,7 +41,7 @@ export class CategoryRepository {
         orderBy: {
           name: 'asc',
         },
-      })
+      }),
     );
     return result || [];
   }
@@ -50,7 +50,7 @@ export class CategoryRepository {
    * Find subcategories of a specific category
    */
   async findSubcategories(parentId: string): Promise<Category[]> {
-    const result = await handleDatabaseOperations(() => 
+    const result = await handleDatabaseOperations(() =>
       this.prisma.category.findMany({
         where: {
           parentId,
@@ -58,7 +58,7 @@ export class CategoryRepository {
         orderBy: {
           name: 'asc',
         },
-      })
+      }),
     );
     return result || [];
   }
@@ -67,20 +67,22 @@ export class CategoryRepository {
    * Find a category by slug (stored in name field)
    */
   async findBySlug(slug: string): Promise<Category | null> {
-    return handleDatabaseOperations(() => 
+    return handleDatabaseOperations(() =>
       this.prisma.category.findFirst({
         where: {
           slug: slug,
         },
-      })
+      }),
     );
   }
 
   /**
    * Find category by ID with subcategories and parent
    */
-  async findByIdWithRelations(id: string): Promise<CategoryWithRelations | null> {
-    return handleDatabaseOperations(() => 
+  async findByIdWithRelations(
+    id: string,
+  ): Promise<CategoryWithRelations | null> {
+    return handleDatabaseOperations(() =>
       this.prisma.category.findUnique({
         where: {
           id,
@@ -89,15 +91,17 @@ export class CategoryRepository {
           subCategories: true,
           parent: true,
         },
-      })
+      }),
     );
   }
 
   /**
    * Find category by slug with subcategories and parent
    */
-  async findBySlugWithRelations(slug: string): Promise<CategoryWithRelations | null> {
-    return handleDatabaseOperations(() => 
+  async findBySlugWithRelations(
+    slug: string,
+  ): Promise<CategoryWithRelations | null> {
+    return handleDatabaseOperations(() =>
       this.prisma.category.findFirst({
         where: {
           slug: slug,
@@ -106,7 +110,7 @@ export class CategoryRepository {
           subCategories: true,
           parent: true,
         },
-      })
+      }),
     );
   }
 
@@ -114,12 +118,12 @@ export class CategoryRepository {
    * Find a category by ID
    */
   async findById(id: string): Promise<Category | null> {
-    return handleDatabaseOperations(() => 
+    return handleDatabaseOperations(() =>
       this.prisma.category.findUnique({
         where: {
           id,
         },
-      })
+      }),
     );
   }
 
@@ -127,13 +131,13 @@ export class CategoryRepository {
    * Check if slug exists
    */
   async slugExists(slug: string, excludeId?: string): Promise<boolean> {
-    const result = await handleDatabaseOperations(() => 
+    const result = await handleDatabaseOperations(() =>
       this.prisma.category.count({
         where: {
           slug: slug,
           id: excludeId ? { not: excludeId } : undefined,
         },
-      })
+      }),
     );
     return result ? result > 0 : false;
   }
@@ -142,17 +146,16 @@ export class CategoryRepository {
    * Create a new category
    */
   async create(data: CreateCategoryDto): Promise<Category> {
-    
-    const result = await handleDatabaseOperations(() => 
+    const result = await handleDatabaseOperations(() =>
       this.prisma.category.create({
-        data
-      })
+        data,
+      }),
     );
-    
+
     if (!result) {
       throw new Error('Failed to create category');
     }
-    
+
     return result;
   }
 
@@ -160,20 +163,19 @@ export class CategoryRepository {
    * Update a category
    */
   async update(id: string, data: UpdateCategoryDto): Promise<Category> {
-    
-    const result = await handleDatabaseOperations(() => 
+    const result = await handleDatabaseOperations(() =>
       this.prisma.category.update({
         where: {
           id,
         },
-       data
-      })
+        data,
+      }),
     );
-    
+
     if (!result) {
       throw new Error(`Failed to update category with ID ${id}`);
     }
-    
+
     return result;
   }
 
@@ -181,18 +183,18 @@ export class CategoryRepository {
    * Delete a category
    */
   async delete(id: string): Promise<Category> {
-    const result = await handleDatabaseOperations(() => 
+    const result = await handleDatabaseOperations(() =>
       this.prisma.category.delete({
         where: {
           id,
         },
-      })
+      }),
     );
-    
+
     if (!result) {
       throw new Error(`Failed to delete category with ID ${id}`);
     }
-    
+
     return result;
   }
 
@@ -200,12 +202,12 @@ export class CategoryRepository {
    * Count subcategories of a category
    */
   async countSubcategories(parentId: string): Promise<number> {
-    const result = await handleDatabaseOperations(() => 
+    const result = await handleDatabaseOperations(() =>
       this.prisma.category.count({
         where: {
           parentId,
         },
-      })
+      }),
     );
     return result || 0;
   }
@@ -214,12 +216,12 @@ export class CategoryRepository {
    * Count products in a category
    */
   async countProducts(categoryId: string): Promise<number> {
-    const result = await handleDatabaseOperations(() => 
+    const result = await handleDatabaseOperations(() =>
       this.prisma.productCategory.count({
         where: {
           categoryId,
         },
-      })
+      }),
     );
     return result || 0;
   }

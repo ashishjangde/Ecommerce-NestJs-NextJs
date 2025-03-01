@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, UseGuards, Req, Res, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  Res,
+  HttpStatus,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Public } from '../../common/decorators/public.decorator';
@@ -107,10 +116,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Google OAuth callback' })
   async googleAuthCallback(@Req() req, @Res() res: Response) {
     const userResponse = await this.authService.socialLogin(req.user, req, res);
-    
+
     // You can redirect to your frontend with user info
     // res.redirect(`${process.env.FRONTEND_URL}/auth/success`);
-    
+
     // Or just return the user data
     res.status(HttpStatus.OK).json(new ApiResponse(userResponse));
   }
@@ -130,10 +139,10 @@ export class AuthController {
   @ApiOperation({ summary: 'GitHub OAuth callback' })
   async githubAuthCallback(@Req() req, @Res() res: Response) {
     const userResponse = await this.authService.socialLogin(req.user, req, res);
-    
+
     // You can redirect to your frontend with user info
     // res.redirect(`${process.env.FRONTEND_URL}/auth/success`);
-    
+
     // Or just return the user data
     res.status(HttpStatus.OK).json(new ApiResponse(userResponse));
   }
@@ -155,7 +164,11 @@ export class AuthController {
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
   })
-  verify(@Body() verifyUserDto: VerifyUserDto, @Req() req, @Res() res: Response) {
+  verify(
+    @Body() verifyUserDto: VerifyUserDto,
+    @Req() req,
+    @Res() res: Response,
+  ) {
     return this.authService.verify(verifyUserDto, req, res);
   }
 
@@ -207,8 +220,14 @@ export class AuthController {
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
   })
-  checkVerificationCode(@Body() checkVerificationCodeDto: VerifyUserDto, @Res() res: Response) {
-    return this.authService.checkVerificationCode(checkVerificationCodeDto, res);
+  checkVerificationCode(
+    @Body() checkVerificationCodeDto: VerifyUserDto,
+    @Res() res: Response,
+  ) {
+    return this.authService.checkVerificationCode(
+      checkVerificationCodeDto,
+      res,
+    );
   }
 
   @Post('/reset-password')
@@ -235,7 +254,10 @@ export class AuthController {
     description: 'Server Error',
     schema: createErrorResponse(500, 'Internal Server Error'),
   })
-  resetPassword(@Body() resetPasswordAuthDto: ResetPasswordAuthDto, @Res() res: Response) {
+  resetPassword(
+    @Body() resetPasswordAuthDto: ResetPasswordAuthDto,
+    @Res() res: Response,
+  ) {
     return this.authService.resetPassword(resetPasswordAuthDto, res);
   }
 
